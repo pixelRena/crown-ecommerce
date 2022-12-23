@@ -1,9 +1,11 @@
 import { initializeApp } from 'firebase/app';
-import { 
+import {
     getAuth, 
+    updateProfile,
     signInWithRedirect, 
     signInWithPopup, 
-    GoogleAuthProvider } from 'firebase/auth';
+    GoogleAuthProvider,
+    createUserWithEmailAndPassword } from 'firebase/auth';
 import { 
     getFirestore,
     doc,
@@ -19,25 +21,25 @@ const firebaseConfig = {
     appId: "1:421016635239:web:876dc414efd19a7cc051c2"
 };
   
-  // Initialize Firebase
+// Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
 
-const provider = new GoogleAuthProvider();
-provider.setCustomParameters({prompt: "select_account"});
+const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({prompt: "select_account"});
 
 export const auth = getAuth();
-export const signInWithGooglePopup = () => signInWithPopup(auth, provider);
+export const signInWithGooglePopup = () => signInWithPopup(auth, googleProvider);
+// export const signInWithGoogleRedirect = () => signInWithRedirect(auth, googleProvider);
 
 export const db = getFirestore();
 
-export const createUserDocFromAuth = async(userAuth) => {
+export const createUserDocFromAuth = async (userAuth, additionalInformation = {}) => {
+    if(!userAuth) return;
+
     const userDocRef = doc(db, "users", userAuth.uid);
-    console.log(userDocRef);
 
     // the instance/data inside of document reference
     const userSnapshot = await getDoc(userDocRef);
-    console.log(userSnapshot);
-    console.log(userSnapshot.exists());
 
     // Check if user data does not exists & create document for data in collection using snapshot
     if(!userSnapshot.exists()) {
@@ -48,7 +50,8 @@ export const createUserDocFromAuth = async(userAuth) => {
             await setDoc(userDocRef, {
                 displayName,
                 email,
-                createdAt
+                createdAt,
+                ...additionalInformation,
             });
         } catch (error) {
             console.log("Error creating user", error.message);
@@ -56,4 +59,11 @@ export const createUserDocFromAuth = async(userAuth) => {
     }
     // Check if user data exists & return
     return userDocRef;
+};
+
+export const createAuthUserWithEmailAndPassword = async (email, password) => {
+    if(!email || !password) return;
+
+    // Use await to return what we will receive back
+    return await createUserWithEmailAndPassword(auth, email, password);
 };
