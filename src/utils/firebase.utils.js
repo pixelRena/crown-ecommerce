@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app';
 import {
     getAuth,
     signInWithRedirect,
+    signOut,
     signInWithEmailAndPassword,
     signInWithPopup, 
     GoogleAuthProvider,
@@ -73,3 +74,5 @@ export const signInUserWithEmailAndPassword = async (email, password) => {
 
     return await signInWithEmailAndPassword(auth, email, password);
 };
+
+export const signOutUser = async() => signOut(auth);
