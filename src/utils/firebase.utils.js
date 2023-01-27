@@ -13,7 +13,9 @@ import {
     getDoc,
     setDoc,
     collection,
-    writeBatch } from 'firebase/firestore';
+    writeBatch,
+    query,
+    getDocs } from 'firebase/firestore';
 
 const firebaseConfig = {
     apiKey: "AIzaSyC6gq32j4_bNQVlcThKy0BcniVczt0ha4c",
@@ -29,6 +31,8 @@ const firebaseApp = initializeApp(firebaseConfig);
 
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({prompt: "select_account"});
+
+// * Helper Functions
 
 export const auth = getAuth();
 export const signInWithGooglePopup = () => signInWithPopup(auth, googleProvider);
@@ -51,6 +55,21 @@ export const addCollectionAndDocuments = async (collectionKey, objectsToAdd) => 
     });
 
     await batch.commit();
+};
+
+export const getCategoriesAndDocuments = async (collectionKey) => {
+    const collectionRef = collection(db, collectionKey);
+    const q = query(collectionRef);
+
+    const querySnapshot = await getDocs(q);
+    const categoryMap = querySnapshot.docs.reduce((acc, docSnapshot) => {
+        const { title, items } = docSnapshot.data();
+        // * Get all category documents and set their objects as needed
+        acc[title.toLowerCase()] = items;
+        return acc;
+    }, {});
+
+    return categoryMap;
 };
 
 export const createUserDocFromAuth = async (userAuth, additionalInformation = {}) => {
