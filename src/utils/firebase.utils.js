@@ -11,7 +11,9 @@ import {
     getFirestore,
     doc,
     getDoc,
-    setDoc } from 'firebase/firestore';
+    setDoc,
+    collection,
+    writeBatch } from 'firebase/firestore';
 
 const firebaseConfig = {
     apiKey: "AIzaSyC6gq32j4_bNQVlcThKy0BcniVczt0ha4c",
@@ -33,6 +35,23 @@ export const signInWithGooglePopup = () => signInWithPopup(auth, googleProvider)
 // export const signInWithGoogleRedirect = () => signInWithRedirect(auth, googleProvider);
 
 export const db = getFirestore();
+
+export const addCollectionAndDocuments = async (collectionKey, objectsToAdd) => {
+    // * Creates & References the collection e.g "categories" from collectionKey
+    const collectionRef = collection(db, collectionKey);
+
+    // * Batch: Allows attachment of RWD's to the batch and when ready to execute, the batch begins after the SET's
+    const batch = writeBatch(db);
+
+    objectsToAdd.forEach((object) => {
+        // * Set the document inside of the collection "categories"
+        const docRef = doc(collectionRef, object.title.toLowerCase());
+        // * Give the document the object (items, {id,image,name,price})
+        batch.set(docRef, object);
+    });
+
+    await batch.commit();
+};
 
 export const createUserDocFromAuth = async (userAuth, additionalInformation = {}) => {
     if(!userAuth) return;
