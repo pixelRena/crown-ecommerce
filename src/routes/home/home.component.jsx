@@ -1,9 +1,9 @@
-import CategoriesMenu from '../../components/categories-menu/categories-menu.component';
-import Categories from '../../components/categories-menu/categories.component';
+import CategoriesMenu from '../../components/directory/categories-menu.component';
+import Directory from "../../components/directory/directory.component";
 
 const Home = () => {
     return (
-        <Categories categories={CategoriesMenu}/>
+        <Directory categories={CategoriesMenu}/>
     );
 }
 
